@@ -285,6 +285,8 @@ namespace orc {
 
     void addUserMetadata(const std::string name, const std::string value) override;
 
+    uint64_t writeIntermediateFooter() override;
+
   private:
     void init();
     void initStripe();
@@ -380,6 +382,17 @@ namespace orc {
     proto::UserMetadataItem* userMetadataItem = fileFooter.add_metadata();
     userMetadataItem->set_name(name);
     userMetadataItem->set_value(value);
+  }
+
+  uint64_t WriterImpl::writeIntermediateFooter() {
+    if (stripeRows > 0) {
+      writeStripe();
+    }
+    writeMetadata();
+    writeFileFooter();
+    writePostscript();
+
+    return outStream->getLength();
   }
 
   void WriterImpl::init() {
